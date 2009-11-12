@@ -60,7 +60,7 @@ def main():
     obj = objLoader.OBJ(meshFile, textureFile)
     print "done"
     print "Preparing gl display list...",
-    obj.prep_list()
+    obj.prep_lists()
     print "done"
     #while (len(l) > 2):
     #    items = l[:-2].split(' ')
@@ -71,15 +71,16 @@ def main():
     #N = len(x)
     print "Entering main loop"
     print " == Usage == "
-    print "  WASD : stafe camera"
-    print "  ZX : zoom camera in/out"
+    print "  wasd : stafe camera"
+    print "  zx : zoom camera in/out"
     print "  click and drag : rotate mesh"
+    print "  tpm : toggle texture, point cloud, mesh"
     glutMainLoop()
     return
 
 def process_normal_keys(key, x, y):
     #print key
-    global scale, xpos, ypos
+    global scale, xpos, ypos, obj
     if key == 'z':
         scale *= 1.1
     elif key == 'x':
@@ -92,6 +93,15 @@ def process_normal_keys(key, x, y):
         ypos += 0.1
     elif key == 'd':
         xpos -= 0.1
+    elif key == 't':
+        obj.showTexture = not obj.showTexture
+        #obj.prep_list()
+    elif key == 'm':
+        obj.showMesh = not obj.showMesh
+        #obj.prep_list()
+    elif key == 'p':
+        obj.showPointCloud = not obj.showPointCloud
+        #obj.prep_list()
     return
 
 def process_mouse(button, state, x, y):
