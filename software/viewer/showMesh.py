@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+
+import sys
+
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
-import sys
 
 import objLoader
 
@@ -17,6 +19,9 @@ ypos = 0.0
 zpos = 0.0
 scale = 0.01
 mouseFocused = False
+mouseRotating = False
+mouseLassoing = False
+lassoPoints = []
 sx = 0
 sy = 0
 #x = []
@@ -27,6 +32,11 @@ obj = None
 meshFile = 'example_mesh/mesh.obj'
 textureFile = 'example_mesh/texture.jpg'
 
+#------------------------------------------------------
+#------------------------------------------------------
+#--------------------- classes ------------------------
+#------------------------------------------------------
+#------------------------------------------------------
 
 def main():
     glutInit(sys.argv)
@@ -73,7 +83,7 @@ def main():
     print " == Usage == "
     print "  wasd : stafe camera"
     print "  zx : zoom camera in/out"
-    print "  click and drag : rotate mesh"
+    print "  right click and drag : rotate mesh"
     print "  tpm : toggle texture, point cloud, mesh"
     glutMainLoop()
     return
@@ -83,16 +93,28 @@ def process_normal_keys(key, x, y):
     global scale, xpos, ypos, obj
     if key == 'z':
         scale *= 1.1
+    elif key == 'Z':
+        scale *= 11.1
     elif key == 'x':
         scale *= 0.9
+    elif key == 'X':
+        scale *= 0.09
     elif key == 'w':
         ypos -= 0.1
+    elif key == 'W':
+        ypos -= 1.0
     elif key == 'a':
         xpos += 0.1
+    elif key == 'A':
+        xpos += 1.0
     elif key == 's':
         ypos += 0.1
+    elif key == 'S':
+        ypos += 1.0
     elif key == 'd':
         xpos -= 0.1
+    elif key == 'D':
+        xpos -= 1.0
     elif key == 't':
         obj.showTexture = not obj.showTexture
         #obj.prep_list()
@@ -106,10 +128,21 @@ def process_normal_keys(key, x, y):
 
 def process_mouse(button, state, x, y):
     #print button, state, x, y
-    global sx, sy
-    if state == GLUT_DOWN and mouseFocused:
+    global sx, sy, mouseFocused, mouseRotating, mouseLassoing, lassoPoints
+    if (state == GLUT_DOWN) and mouseFocused and (button == GLUT_RIGHT_BUTTON):
         sx = x
         sy = y
+        mouseRotating = True
+    elif state == GLUT_UP:
+        if button == GLUT_RIGHT_BUTTON:
+            mouseRotating = False
+        # elif button == GLUT_LEFT_BUTTON:
+        #     mouseLassoing = False
+        #     lassoPoints = []
+    # elif (state == GLUT_DOWN) and mouseFocused and (button == GLUT_LEFT_BUTTON):
+    #     # start selection lasso
+    #     lassoPoints += [(x,y),]
+    #     mouseLassoing = True
     return
 
 def process_mouse_entry(state):
@@ -119,27 +152,32 @@ def process_mouse_entry(state):
     if state == GLUT_ENTERED:
         mouseFocused = True
 
-def process_passive_mouse_motion(x, y):
-    if not mouseFocused:
-        return
-    dx = x/200.0 - 1.0
-    dy = y/200.0 - 1.0
-    global xrot, yrot, angle
-    xrot = dy
-    yrot = dx
-    angle = (dx * dx + dy * dy) ** 0.5 * 20.0
-    return
+# def process_passive_mouse_motion(x, y):
+#     global mouseFocused, mouseRotating
+#     if (not mouseFocused) or (not mouseRotating):
+#         return
+#     dx = x/200.0 - 1.0
+#     dy = y/200.0 - 1.0
+#     global xrot, yrot, angle
+#     xrot = dy
+#     yrot = dx
+#     angle = (dx * dx + dy * dy) ** 0.5 * 20.0
+#     return
 
 def process_active_mouse_motion(x, y):
-    global mouseFocused
-    if not mouseFocused:
-        return
-    dx = (x - sx)/400.0
-    dy = (y - sy)/400.0
-    global xrot, yrot, angle
-    xrot += dx
-    yrot += dy
-    #angle += (dx * dx + dy * dy) ** 0.5 * 20.0
+    global mouseFocused, mouseRotating, mouseLassoing
+    if mouseFocused:
+        if mouseRotating:
+            dx = (x - sx)/400.0
+            dy = (y - sy)/400.0
+            global xrot, yrot, angle
+            xrot += dx
+            yrot += dy
+            #angle += (dx * dx + dy * dy) ** 0.5 * 20.0
+        # if mouseLassoing:
+        #     global lassoPoints
+        #     if lassoPoints[-1] != (x,y):
+        #         lassoPoints += [(x,y),]
     return
 
 def display():
@@ -163,6 +201,26 @@ def display():
     #    glVertex3f(x[i],y[i],z[i])
     #glEnd()
     glPopMatrix()
+    
+    # draw lasso
+    # global lassoPoints
+    # if len(lassoPoints) > 0:
+    #     print lassoPoints[-1]
+    #     glPushMatrix()
+    #     glLoadIdentity()
+    #     glColor3f(1.0, 0.0, 0.0)
+    #     glBegin(GL_LINE_STRIP)
+    #     #for point in lassoPoints:
+    #     #    glVertex2f(point[0]/400.0-1, 1-point[1]/400.0)
+    #     #    #glVertex2f((point[0]-200.0)/50.0, (200.0-point[1])/50.0)
+    #     glVertex2f(1.0,1.0)
+    #     glVertex2f(1.0,-1.0)
+    #     glVertex2f(-1.0,1.0)
+    #     glVertex2f(-1.0,-1.0)
+    #     glVertex2f(1.0,1.0)
+    #     glEnd()
+    #     glPopMatrix()
+    
     glutSwapBuffers()
     glutPostRedisplay()
     return

@@ -116,6 +116,7 @@ class OBJ:
             #else:
             #    # just use diffuse colour
             #    glColor(*mtl['Kd'])
+            glMaterialfv(GL_FRONT,GL_DIFFUSE,(1.0, 1.0, 1.0, 1.0))
             glBegin(GL_POLYGON)
             for i in range(0, len(vertices)):
                 if normals[i] > 0:
@@ -138,48 +139,6 @@ class OBJ:
     def prep_lists(self):
         self.prep_mesh_list()
         self.prep_point_cloud_list()
-        # self.meshList, self.pointCloudList = glGenLists(2)
-        # self.meshList =
-        # glNewList(self.meshList, GL_COMPILE)
-        # 
-        # if self.meshList == None:
-        #     self.gl_list = glGenLists(1)
-        # else:
-        #     glDeleteLists(self.gl_list, 1)
-        #     self.gl_list = glGenLists(1)
-        # glNewList(self.gl_list, GL_COMPILE)
-        # if self.showMesh:
-        #     if self.showTexture:
-        #         glEnable(GL_TEXTURE_2D)
-        #         glBindTexture(GL_TEXTURE_2D, self.texId)
-        #     glFrontFace(GL_CCW)
-        #     for face in self.faces:
-        #         #print "processing face..."
-        #         vertices, normals, texture_coords, material = face
-        #         #mtl = self.mtl[material]
-        #         #if 'texture_Kd' in mtl:
-        #         #    # use diffuse texmap
-        #         #    glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
-        #         #else:
-        #         #    # just use diffuse colour
-        #         #    glColor(*mtl['Kd'])
-        #         glBegin(GL_POLYGON)
-        #         for i in range(0, len(vertices)):
-        #             if normals[i] > 0:
-        #                 glNormal3fv(self.normals[normals[i] - 1])
-        #             if texture_coords[i] > 0:
-        #                 glTexCoord2fv(self.texcoords[texture_coords[i] - 1])
-        #             glVertex3fv(self.vertices[vertices[i] - 1])
-        #         glEnd()
-        #     if self.showTexture:
-        #         glDisable(GL_TEXTURE_2D)
-        # if self.showPointCloud:
-        #     glPointSize(2.0)
-        #     glBegin(GL_POINTS)
-        #     for v in self.vertices:
-        #         glVertex3f(*v)
-        #     glEnd()
-        # glEndList()
     def display(self):
         if self.showMesh:
             if self.showTexture:
@@ -190,7 +149,3 @@ class OBJ:
                 glDisable(GL_TEXTURE_2D)
         if self.showPointCloud:
             glCallList(self.pointCloudList)
-        #if self.showMesh:
-        #    self.display_mesh()
-        #if self.showPointCloud:
-        #    self.display_point_cloud()
