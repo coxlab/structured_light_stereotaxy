@@ -20,7 +20,7 @@ NClusters = 3
 if len(sys.argv) > 2:
     NClusters = int(sys.argv[2])
 
-def process_file(filename, NClusters = 3, maxTries = 3):
+def get_clusters(filename, NClusters = 3, maxTries = 3):
     logging.debug("Loading file...")
     data = load_mesh_file(filename)
     # mx = mean(data['x'])
@@ -146,7 +146,7 @@ def align_clustered_data_to_z(clusters):
 #             clusters[c]['x'][i], clusters[c]['y'][i], clusters[c]['z'][i] = (nx, ny, nz)
 #     return clusters
 
-def print_data(clusters):
+def print_clusters(clusters):
     clusterMeans = [mean(c['z']) for c in clusters]
     clusterMeans.sort()
     
@@ -160,7 +160,7 @@ def print_data(clusters):
             print "%.3f\t" % abs(clusterMeans[i] - clusterMeans[i2]),
         print
 
-def plot_data(clusters):
+def plot_clusters(clusters):
     colors = ['b', 'r', 'g', 'c', 'm']
     for i in xrange(len(clusters)):
         subplot(221)
@@ -207,9 +207,9 @@ def rotate_about_z(points, angle):
     return points
 
 if __name__ == "__main__":
-    clusters = process_file(filename)
-    print_data(clusters)
-    plot_data(clusters)
+    clusters = get_clusters(filename)
+    print_clusters(clusters)
+    plot_clusters(clusters)
 # -=-=-=-=-=- old -=-=-=-=-=-=-=-=-
 # 
 # # read file
