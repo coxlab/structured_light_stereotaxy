@@ -4,7 +4,7 @@ import sys
 import logging
 
 # debug
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from pylab import *
 from scipy.cluster.vq import *
@@ -20,34 +20,48 @@ NClusters = 3
 if len(sys.argv) > 2:
     NClusters = int(sys.argv[2])
 
-def get_clusters(filename, NClusters = 3, maxTries = 3):
-    logging.debug("Loading file...")
+def get_clusters(filename, NClusters = 3, maxTries = 3, alignZData = True):
+    logging.debug("Loading file:%s" % filename)
     data = load_mesh_file(filename)
-    # mx = mean(data['x'])
-    # my = mean(data['y'])
-    # mz = mean(data['z'])
-    # data['x'] = array(data['x']) - mx
-    # data['y'] = array(data['y']) - my
-    # data['z'] = array(data['z']) - mz
+    
+    # center mesh
+    data['x'] = array(data['x']) - mean(data['x'])
+    data['y'] = array(data['y']) - mean(data['y'])
+    data['z'] = array(data['z']) - mean(data['z'])
+    
+    if alignZData:
+        data = align_data_to_z(data)
+        data = align_data_to_z(data)
+    
     tries = 0
     while (tries < maxTries):
         logging.debug("Entering cluster_points_on_axis")
         clusters = cluster_points_on_axis(data, NClusters)
-        if len(clusters) == NClusters:
-            tries = maxTries
-        else:
+        if len(clusters) != NClusters:
             tries += 1
             NClusters -= 1
             if NClusters == 1:
                 print "Clustering failed, raising exception"
-                raise ValueError("process_file could not find >1 cluster in file:"+str(filename))
-            print "Clustering failed with N="+str(NClusters+1)+" trying "+str(NClusters)
-    clusters = align_clustered_data_to_z(clusters)
-    clusters = align_clustered_data_to_z(clusters)
-    clusters = align_clustered_data_to_z(clusters)
+                raise ValueError("process_file could not find >1 cluster in file:%s" % filename)
+            print "Clustering failed with N=%i trying %i" % (NClusters+1, NClusters)
+        else:
+            tries = maxTries
     return clusters
 
 # ===========
+def calculate_data_normals(data):
+    data['normals'] = []
+    for f in data['faces']:
+        p1 = array([data['x'][f[0]], data['y'][f[0]], data['z'][f[0]]])
+        p2 = array([data['x'][f[1]], data['y'][f[1]], data['z'][f[1]]])
+        p3 = array([data['x'][f[2]], data['y'][f[2]], data['z'][f[2]]])
+        U = p2 - p1
+        V = p3 - p1
+        normal = cross(U,V)
+        data['normals'] += [normal,]
+    
+    return data
+
 def load_mesh_file(filename):
     """ 
     argument(s):
@@ -55,7 +69,7 @@ def load_mesh_file(filename):
     returns:
         data: dictionary of 'x','y','z' coordinates for each vertex from the obj file"""
     f = open(filename, 'r')
-    data = {'x': [], 'y': [], 'z': []}
+    data = {'x': [], 'y': [], 'z': [], 'faces': [], 'normals': []}
     
     for l in f:
         if l[:2] == 'v ':
@@ -63,9 +77,16 @@ def load_mesh_file(filename):
             data['x'] += [float(items[1]),]
             data['y'] += [float(items[2]),]
             data['z'] += [float(items[3]),]
-    
+        if l[:2] == 'f ':
+            items = l.split(' ')
+            if len(items) == 4:
+                # the vertex defs within a face def are 1 indexed (not 0)
+                data['faces'] += [[int(items[1].split('/')[0])-1,
+                                int(items[2].split('/')[0])-1,
+                                int(items[3].split('/')[0])-1],]
     f.close()
-    return data
+    
+    return calculate_data_normals(data)
 
 def cluster_points_on_axis(data, NClusters, clusterAxis='z'):
     """
@@ -74,10 +95,15 @@ def cluster_points_on_axis(data, NClusters, clusterAxis='z'):
         NClusters:  number of clusters to try
     returns:
         clusters:   """
+    
+    # mData = transpose(array([data['x'],data['y'],data['z']]))
+    # wData = whiten(mData)
+    # centers, idx = kmeans2(wData, NClusters, iter=1000)
+    
     wz = whiten(data[clusterAxis])
     kInit = linspace(min(wz), max(wz), NClusters)
     logging.debug("-cluster_points_on_axis- Calling kmeans2")
-    centers, idx = kmeans2(wz, kInit, iter=100, minit='matrix')
+    centers, idx = kmeans2(wz, kInit, iter=1000, minit='matrix')
     
     # split up data
     clusters = [{'x': [], 'y': [], 'z': []} for i in xrange(NClusters)]
@@ -89,7 +115,33 @@ def cluster_points_on_axis(data, NClusters, clusterAxis='z'):
     
     return clusters
 
-def align_clustered_data_to_z(clusters):
+def align_data_to_z(data):
+    def get_centroid():
+        return {'x': sum(data['x'])/len(data['x']),
+                'y': sum(data['y'])/len(data['y']),
+                'z': sum(data['z'])/len(data['z'])}
+    
+    # TODO rotate mesh so when looking up z-axis (down at mesh) you see a rectangle
+    # aligned on the x and y axes
+    
+    data = calculate_data_normals(data)
+    meanNormal = median(data['normals'],0)
+    normNormal = meanNormal / sqrt(sum(meanNormal**2))
+    yAngle = -arctan2(normNormal[0],normNormal[2])
+    centroid = get_centroid()
+    logging.debug("-align_data_to_z- yAngle:%.3f" % degrees(yAngle))
+    data = rotate_about_y(data, yAngle, centroid)
+    
+    data = calculate_data_normals(data)
+    meanNormal = median(data['normals'],0)
+    normNormal = meanNormal / sqrt(sum(meanNormal**2))
+    xAngle = arctan2(normNormal[1],normNormal[2])
+    centroid = get_centroid()
+    logging.debug("-align_data_to_z- xAngle:%.3f" % degrees(xAngle))
+    data = rotate_about_x(data, xAngle, centroid)
+    return data
+
+def align_clustered_data_to_z(clusters, xAngle=None, yAngle=None):
     def weighted_slope(axis1, axis2):
         slope = 0.0
         NPoints = 0
@@ -99,22 +151,44 @@ def align_clustered_data_to_z(clusters):
             NPoints += len(clusters[i]['x'])
         return slope / NPoints
     
-    zAngle = -arctan2(weighted_slope('x','y'), 1.0) # subplot 1
-    logging.debug("-align_clustered_data_to_z- zAngle:%.3f" % degrees(zAngle))
-    for i in xrange(len(clusters)):
-        clusters[i] = rotate_about_z(clusters[i], zAngle)
-    # return clusters
+    def get_centroid():
+        sx = 0.
+        sy = 0.
+        sz = 0.
+        nx = 0
+        ny = 0
+        nz = 0
+        for i in xrange(len(clusters)):
+            sx += sum(clusters[i]['x'])
+            sy += sum(clusters[i]['y'])
+            sz += sum(clusters[i]['z'])
+            nx += len(clusters[i]['x'])
+            ny += len(clusters[i]['y'])
+            nz += len(clusters[i]['z'])
+        return {'x':sx/nx, 'y':sy/ny, 'z':sz/nz}
     
-    xAngle = -arctan2(weighted_slope('y','z'), 1.0) # subplot 3
-    logging.debug("-align_clustered_data_to_z- xAngle:%.3f" % degrees(xAngle))
-    for i in xrange(len(clusters)):
-        clusters[i] = rotate_about_x(clusters[i], xAngle)
-    #return clusters
+    #xCentroid = get_centroid('y', 'z')
+    #yCentroid = get_centroid('x', 'z')
+    centroid = get_centroid()
     
-    yAngle = arctan2(weighted_slope('x', 'z'), 1.0) # subplot 2
+    #if yAngle == None:
+    #    yAngle = arctan2(weighted_slope('x', 'z'), 1.0) # subplot 2
     logging.debug("-align_clustered_data_to_z- yAngle:%.3f" % degrees(yAngle))
     for i in xrange(len(clusters)):
-        clusters[i] = rotate_about_y(clusters[i], yAngle)
+        clusters[i] = rotate_about_y(clusters[i], yAngle, centroid)
+    
+    #if xAngle == None:
+    #    xAngle = -arctan2(weighted_slope('y','z'), 1.0) # subplot 3
+    logging.debug("-align_clustered_data_to_z- xAngle:%.3f" % degrees(xAngle))
+    for i in xrange(len(clusters)):
+        clusters[i] = rotate_about_x(clusters[i], xAngle, centroid)
+    #return clusters
+    
+    # zAngle = -arctan2(weighted_slope('x','y'), 1.0) # subplot 1
+    # logging.debug("-align_clustered_data_to_z- zAngle:%.3f" % degrees(zAngle))
+    # for i in xrange(len(clusters)):
+    #     clusters[i] = rotate_about_z(clusters[i], zAngle)
+    
     return clusters
 
 # def align_clustered_data_to_z(clusters):
@@ -160,7 +234,7 @@ def print_clusters(clusters):
             print "%.3f\t" % abs(clusterMeans[i] - clusterMeans[i2]),
         print
 
-def plot_clusters(clusters):
+def plot_clusters(clusters, saveToFile=None):
     colors = ['b', 'r', 'g', 'c', 'm']
     for i in xrange(len(clusters)):
         subplot(221)
@@ -176,35 +250,37 @@ def plot_clusters(clusters):
     subplot(222); xlabel("X"); ylabel("Z")
     subplot(223); xlabel("Y"); ylabel("Z")
     subplot(224); xlabel("Z");
-    
-    show()
+    if saveToFile != None:
+        savefig(saveToFile)
+    else:
+        show()
 
-def rotate_about_x(points, angle):
+def rotate_about_x(points, angle, centroid):
     for i in xrange(len(points['x'])):
-        x, y, z = points['x'][i], points['y'][i], points['z'][i]
+        x, y, z = points['x'][i], points['y'][i]-centroid['y'], points['z'][i]-centroid['z']
         nx = x
         ny = y*cos(angle)-z*sin(angle)
         nz = y*sin(angle)+z*cos(angle)
         points['x'][i], points['y'][i], points['z'][i] = nx, ny, nz
     return points
 
-def rotate_about_y(points, angle):
+def rotate_about_y(points, angle, centroid):
     for i in xrange(len(points['x'])):
-        x, y, z = points['x'][i], points['y'][i], points['z'][i]
+        x, y, z = points['x'][i]-centroid['x'], points['y'][i], points['z'][i]-centroid['z']
         nx = x*cos(angle)+z*sin(angle)
         ny = y
         nz = -x*sin(angle)+z*cos(angle)
         points['x'][i], points['y'][i], points['z'][i] = nx, ny, nz
     return points
 
-def rotate_about_z(points, angle):
-    for i in xrange(len(points['x'])):
-        x, y, z = points['x'][i], points['y'][i], points['z'][i]
-        nx = x*cos(angle)-y*sin(angle)
-        ny = x*sin(angle)+y*cos(angle)
-        nz = z
-        points['x'][i], points['y'][i], points['z'][i] = nx, ny, nz
-    return points
+# def rotate_about_z(points, angle):
+#     for i in xrange(len(points['x'])):
+#         x, y, z = points['x'][i], points['y'][i], points['z'][i]
+#         nx = x*cos(angle)-y*sin(angle)
+#         ny = x*sin(angle)+y*cos(angle)
+#         nz = z
+#         points['x'][i], points['y'][i], points['z'][i] = nx, ny, nz
+#     return points
 
 if __name__ == "__main__":
     clusters = get_clusters(filename)

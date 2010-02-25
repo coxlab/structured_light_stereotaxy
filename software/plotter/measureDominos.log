@@ -1,0 +1,140 @@
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s11.obj
+DEBUG:root:-align_data_to_z- yAngle:23.455
+DEBUG:root:-align_data_to_z- xAngle:-0.944
+DEBUG:root:-align_data_to_z- yAngle:-0.003
+DEBUG:root:-align_data_to_z- xAngle:-0.017
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s12.obj
+DEBUG:root:-align_data_to_z- yAngle:23.346
+DEBUG:root:-align_data_to_z- xAngle:-1.511
+DEBUG:root:-align_data_to_z- yAngle:-0.022
+DEBUG:root:-align_data_to_z- xAngle:0.010
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s13.obj
+DEBUG:root:-align_data_to_z- yAngle:23.506
+DEBUG:root:-align_data_to_z- xAngle:-1.007
+DEBUG:root:-align_data_to_z- yAngle:-0.014
+DEBUG:root:-align_data_to_z- xAngle:0.007
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s14.obj
+DEBUG:root:-align_data_to_z- yAngle:23.951
+DEBUG:root:-align_data_to_z- xAngle:-1.038
+DEBUG:root:-align_data_to_z- yAngle:-0.028
+DEBUG:root:-align_data_to_z- xAngle:-0.002
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s15.obj
+DEBUG:root:-align_data_to_z- yAngle:23.336
+DEBUG:root:-align_data_to_z- xAngle:-1.278
+DEBUG:root:-align_data_to_z- yAngle:0.021
+DEBUG:root:-align_data_to_z- xAngle:0.001
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s16.obj
+DEBUG:root:-align_data_to_z- yAngle:23.491
+DEBUG:root:-align_data_to_z- xAngle:8.688
+DEBUG:root:-align_data_to_z- yAngle:0.001
+DEBUG:root:-align_data_to_z- xAngle:-0.013
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s17.obj
+DEBUG:root:-align_data_to_z- yAngle:5.131
+DEBUG:root:-align_data_to_z- xAngle:-0.775
+DEBUG:root:-align_data_to_z- yAngle:-0.000
+DEBUG:root:-align_data_to_z- xAngle:0.010
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s18.obj
+DEBUG:root:-align_data_to_z- yAngle:22.767
+DEBUG:root:-align_data_to_z- xAngle:-13.122
+DEBUG:root:-align_data_to_z- yAngle:-0.007
+DEBUG:root:-align_data_to_z- xAngle:0.002
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s19.obj
+DEBUG:root:-align_data_to_z- yAngle:31.594
+DEBUG:root:-align_data_to_z- xAngle:-4.369
+DEBUG:root:-align_data_to_z- yAngle:-0.008
+DEBUG:root:-align_data_to_z- xAngle:0.001
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d1s20.obj
+DEBUG:root:-align_data_to_z- yAngle:34.593
+DEBUG:root:-align_data_to_z- xAngle:-2.367
+DEBUG:root:-align_data_to_z- yAngle:-0.014
+DEBUG:root:-align_data_to_z- xAngle:-0.002
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s11.obj
+DEBUG:root:-align_data_to_z- yAngle:23.562
+DEBUG:root:-align_data_to_z- xAngle:-1.410
+DEBUG:root:-align_data_to_z- yAngle:0.018
+DEBUG:root:-align_data_to_z- xAngle:-0.008
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s12.obj
+DEBUG:root:-align_data_to_z- yAngle:23.625
+DEBUG:root:-align_data_to_z- xAngle:-1.046
+DEBUG:root:-align_data_to_z- yAngle:0.019
+DEBUG:root:-align_data_to_z- xAngle:-0.006
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s13.obj
+DEBUG:root:-align_data_to_z- yAngle:23.444
+DEBUG:root:-align_data_to_z- xAngle:-1.165
+DEBUG:root:-align_data_to_z- yAngle:-0.032
+DEBUG:root:-align_data_to_z- xAngle:-0.008
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s14.obj
+DEBUG:root:-align_data_to_z- yAngle:23.125
+DEBUG:root:-align_data_to_z- xAngle:-1.288
+DEBUG:root:-align_data_to_z- yAngle:-0.051
+DEBUG:root:-align_data_to_z- xAngle:0.006
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s15.obj
+DEBUG:root:-align_data_to_z- yAngle:23.418
+DEBUG:root:-align_data_to_z- xAngle:-1.019
+DEBUG:root:-align_data_to_z- yAngle:-0.005
+DEBUG:root:-align_data_to_z- xAngle:-0.003
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s16.obj
+DEBUG:root:-align_data_to_z- yAngle:23.597
+DEBUG:root:-align_data_to_z- xAngle:5.546
+DEBUG:root:-align_data_to_z- yAngle:0.007
+DEBUG:root:-align_data_to_z- xAngle:-0.001
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s17.obj
+DEBUG:root:-align_data_to_z- yAngle:13.910
+DEBUG:root:-align_data_to_z- xAngle:-0.389
+DEBUG:root:-align_data_to_z- yAngle:0.022
+DEBUG:root:-align_data_to_z- xAngle:0.020
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s18.obj
+DEBUG:root:-align_data_to_z- yAngle:22.895
+DEBUG:root:-align_data_to_z- xAngle:-7.869
+DEBUG:root:-align_data_to_z- yAngle:0.006
+DEBUG:root:-align_data_to_z- xAngle:0.002
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s19.obj
+DEBUG:root:-align_data_to_z- yAngle:31.969
+DEBUG:root:-align_data_to_z- xAngle:-10.147
+DEBUG:root:-align_data_to_z- yAngle:0.036
+DEBUG:root:-align_data_to_z- xAngle:0.014
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
+DEBUG:root:Loading file:/Users/graham/Projects/structuredLight/scans/cleaned_dominos/d2s20.obj
+DEBUG:root:-align_data_to_z- yAngle:49.851
+DEBUG:root:-align_data_to_z- xAngle:-2.863
+DEBUG:root:-align_data_to_z- yAngle:0.040
+DEBUG:root:-align_data_to_z- xAngle:0.002
+DEBUG:root:Entering cluster_points_on_axis
+DEBUG:root:-cluster_points_on_axis- Calling kmeans2
