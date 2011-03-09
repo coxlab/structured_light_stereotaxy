@@ -89,7 +89,7 @@ if not os.path.exists(inDir):
 
 # find all scans for this animal
 scanDirs = os.listdir(inDir)
-scanDirs = [s for s in scanDirs if s.find('Scan') != -1]
+scanDirs = [s for s in scanDirs]# if s.find('Scan') != -1]
 if len(scanDirs) < 2:
     raise IOError('There must be at least 2 scans, only %i found' % len(scanDirs))
 if not cfg.skullScan in scanDirs:
@@ -164,7 +164,11 @@ def find_skull_landmarks(skullObj, skullTexture, scanDir):
     return bregmaXYZ, bregmaNormal, bregmaToLambdaVector
 
 def calculate_scan_to_skull_matrix(bLoc, bNorm, bToLVec):
-    R = vector.rebase(numpy.cross(-numpy.array(bToLVec), bNorm), -numpy.array(bToLVec), bNorm)
+    a1 = numpy.cross(-numpy.array(bToLVec), bNorm)
+    a2 = numpy.cross(bNorm, a1)
+    a3 = bNorm
+    #R = vector.rebase(numpy.cross(-numpy.array(bToLVec), bNorm), -numpy.array(bToLVec), bNorm)
+    R = vector.rebase(a1, a2, a3)
     T = vector.translation_to_matrix(-bLoc[0],-bLoc[1],-bLoc[2])
     return vector.translate_and_rotate(T,R)
 
@@ -208,6 +212,10 @@ logging.debug('Calculating scan-to-skull matrix')
 bregmaLocation, bregmaNormal, bregmaToLambdaVector = find_skull_landmarks(skullObj, skullTexture, '%s/%s' % (inDir, cfg.skullScan))
 scanToSkullMatrix = calculate_scan_to_skull_matrix(bregmaLocation, bregmaNormal, bregmaToLambdaVector)
 logging.debug('\tMatrix:\n'+str(pylab.array(scanToSkullMatrix)))
+pylab.savetxt(outDir+'/scanToSkullMatrix', scanToSkullMatrix)
+pylab.savetxt(outDir+'/bregmaInScan', bregmaLocation)
+pylab.savetxt(outDir+'/bregmaToLambda', bregmaToLambdaVector)
+pylab.savetxt(outDir+'/bregmaNormal', bregmaNormal)
 
 # 3. load and fix hat scan
 logging.debug('Loading and fixing hat scan')
@@ -223,7 +231,6 @@ skullObj.vertices = vector.apply_matrix_to_points(pylab.matrix(scanToSkullMatrix
 hatObj.vertices = vector.apply_matrix_to_points(pylab.matrix(scanToSkullMatrix), hatObj.vertices)[:,:3]
 # skullObj.apply_matrix(scanToSkullMatrix)
 # hatObj.apply_matrix(scanToSkullMatrix)
-# TODO save
 
 logging.debug('Saving new meshes')
 skullObj.save(outDir+'/skullInSkull.obj')
@@ -237,6 +244,7 @@ hatRefs = find_hat_refs(hatObj, hatTexture, '%s/%s' % (inDir, cfg.hatScan))
 skullToHatMatrix = calculate_skull_to_hat_matrix(hatRefs)
 logging.debug('\tMatrix:\n'+str(pylab.array(skullToHatMatrix)))
 pylab.savetxt(outDir+'/skullToHatMatrix', skullToHatMatrix)
+pylab.savetxt(outDir+'/hatRefs', hatRefs)
 # TODO save
 
 # 7. load and fix final scan

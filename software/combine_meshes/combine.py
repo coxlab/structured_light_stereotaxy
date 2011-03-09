@@ -8,13 +8,13 @@ import PIL.Image as Image
 from bjg.obj import OBJ
 from bjg.vector import make_homogeneous
 
-baseDir = 'data/H7'
-#meshFiles = ['%s/skullInSkull.obj' % baseDir, '%s/hatInSkull.obj' % baseDir]
-meshFiles = ['%s/skullInSkull_cropped.obj' % baseDir, '%s/hatInSkull_cropped.obj' % baseDir, '%s/finalInSkull_cropped.obj' % baseDir]
-#meshFiles = ['%s/%s' % (baseDir, f) for f in os.listdir(baseDir) if '.obj' in f]
+baseDir = '../scan_analysis_pipeline/data/H8'
+#meshFiles = ['%s/skullInSkull_simple.obj' % baseDir, '%s/hatInSkull_simple.obj' % baseDir]
+#meshFiles = ['%s/skullInSkull_simple.obj' % baseDir, '%s/hatInSkull_simple.obj' % baseDir, '%s/finalInSkull_simple.obj' % baseDir]
+meshFiles = ['%s/%s' % (baseDir, f) for f in os.listdir(baseDir) if '.obj' in f]
 #textureFiles = ['%s/skullInSkull.png' % baseDir, '%s/hatInSkull.png' % baseDir]
-textureFiles = ['%s/skullInSkull.png' % baseDir, '%s/hatInSkull.png' % baseDir, '%s/finalInSkull.png' % baseDir]
-#textureFiles = ['%s/%s' % (baseDir, f) for f in os.listdir(baseDir) if '.png' in f]
+#textureFiles = ['%s/skullInSkull.png' % baseDir, '%s/hatInSkull.png' % baseDir, '%s/finalInSkull.png' % baseDir]
+textureFiles = ['%s/%s' % (baseDir, f) for f in os.listdir(baseDir) if '.png' in f]
 
 combinedMeshname = '%s/%s' % (baseDir, 'combined.obj')
 combinedTexturename = '%s/%s' % (baseDir, 'combined.png')

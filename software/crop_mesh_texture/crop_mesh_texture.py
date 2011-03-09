@@ -10,8 +10,8 @@ from bjg.obj import OBJ
 
 o = OBJ()
 
-objFilename = 'scans/H7/Scan03/ref.obj'
-textureFilename = 'scans/H7/Scan03/ref.png'
+objFilename = '/Users/graham/Desktop/mesh_fill/cropped.obj'#'scans/K3/Scan05/skull.obj'
+textureFilename = '/Users/graham/Desktop/mesh_fill/cropped.png'#'scans/K3/Scan05/skull.png'
 
 if len(sys.argv) == 3:
     objFilename = sys.argv[1]
