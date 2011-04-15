@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import os, sys
 
 from pylab import *
 from scikits import delaunay
@@ -10,6 +10,13 @@ from bjg.obj import OBJ
 
 objFile = 'Scan02.obj'
 imFile = 'Scan02.png'
+
+if len(sys.argv) == 2:
+    objFile = sys.argv[1]
+    imFile = os.path.splitext(objFile)[0] + '.png'
+if len(sys.argv) > 2:
+    objFile = sys.argv[1]
+    imFile = sys.argv[2]
 
 # load obj
 o = OBJ()
