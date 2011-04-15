@@ -69,7 +69,7 @@ import cfg
 
 
 # process command line options
-cfg.process_command_line()
+#cfg.process_command_line()
 logging.debug('Processing scan for animal: %s' % cfg.animal)
 
 
@@ -165,8 +165,10 @@ def find_skull_landmarks(skullObj, skullTexture, scanDir):
 
 def calculate_scan_to_skull_matrix(bLoc, bNorm, bToLVec):
     a1 = numpy.cross(-numpy.array(bToLVec), bNorm)
-    a2 = numpy.cross(bNorm, a1)
-    a3 = bNorm
+    #a2 = numpy.cross(bNorm, a1)
+    a2 = -numpy.array(bToLVec)
+    #a3 = bNorm
+    a3 = numpy.cross(a1,-numpy.array(bToLVec))
     #R = vector.rebase(numpy.cross(-numpy.array(bToLVec), bNorm), -numpy.array(bToLVec), bNorm)
     R = vector.rebase(a1, a2, a3)
     T = vector.translation_to_matrix(-bLoc[0],-bLoc[1],-bLoc[2])
