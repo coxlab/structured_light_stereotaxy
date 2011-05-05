@@ -51,8 +51,8 @@ import os, shutil, subprocess
 import numpy
 import pylab
 
-import bjg.vector as vector
-import bjg.obj as obj
+import utilities.vector as vector
+import utilities.obj as obj
 
 # ====================================================================
 # ========================  Setup ====================================
