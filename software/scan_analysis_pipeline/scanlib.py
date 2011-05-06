@@ -7,6 +7,8 @@ Define a Scan object that supports:
 import logging, os, shutil, subprocess
 
 import numpy, pylab
+import PIL.Image as Image
+from scikits import delaunay
 
 import utilities.obj as obj
 import utilities.vector as vector
@@ -19,6 +21,50 @@ def test(testFunc, testFile, lvl=logging.ERROR):
 
 def xy_to_uv(xy,im):
     return xy[0]/im.shape[1], 1.-xy[1]/im.shape[0]
+
+def crop_texture(o):
+    """
+    Load, and then crop an objects texture image, removing all un-referenced areas
+    
+    returns a texture of type PIL.Image
+    """
+    im = Image.open(o.textureFilename)
+    w, h = im.size
+    uvs = o.texCoords
+    xys = numpy.zeros_like(uvs)
+    xys[:,0] = uvs[:,0]*w
+    xys[:,1] = h - uvs[:,1]*h
+    
+    xm, ym = (xys.min(0) - 2).astype(int)
+    xM, yM = (xys.max(0) + 2).astype(int)
+    
+    cim = im.crop((xm,ym,xM,yM))
+    
+    cw, ch = cim.size
+    cw = float(cw)
+    ch = float(ch)
+    
+    o.texCoords[:,0] = (xys[:,0] - xm) / cw
+    o.texCoords[:,1] = 1. - (xys[:,1] - ym) / ch
+    
+    return cim
+
+def regen_faces(o):
+    """
+    Regenerate all the faces of a mesh using just the uv texture coordinates
+    """
+    tri = delaunay.Triangulation(o.texCoords[:,0], o.texCoords[:,1])
+
+    o.faces = zeros((len(tri.triangle_nodes),3,3))
+    o.faces[:,0,:] = tri.triangle_nodes
+    o.faces[:,1,:] = tri.triangle_nodes
+    return o
+
+def simply(o):
+    """
+    simply a mesh
+    """
+    return o
 
 class Scan(object):
     """
@@ -69,10 +115,18 @@ class Scan(object):
             test(os.path.exists, s)
             test(os.path.isdir, s)
             
-            for f in ['%s/%s.%s' % (s, f, e)
-                        for f in [self.cfg.refName, self.cfg.skullName]
-                        for e in ['png','obj']]:
+            for f in ['%s/%s.obj' % (s, f)
+                        for f in [self.cfg.refName, self.cfg.skullName]]:
                 test(os.path.exists, f)
+                test(os.path.isfile, f)
+            
+            for f in ['%s/%s.png' % (s, f)
+                        for f in [self.cfg.refName, self.cfg.skullName]]:
+                if not test(os.path.exists, f, logging.WARNING):
+                    logging.warning("%s did not exist, looking for jpg version" % f)
+                    test(os.path.exists, os.path.splitext(f)[0] + '.jpg')
+                    logging.debug("creating from jpg: %s" % f)
+                    shutil.copyfile(os.path.splitext(f)[0] + '.jpg', f)
                 test(os.path.isfile, f)
     
     def check_output(self):
@@ -192,9 +246,17 @@ class Scan(object):
         for s, f  in [[self.skullObj,'skullInSkull'],
                         [self.hatObj, 'hatInSkull'],
                         [self.finalObj, 'finalInSkull']]:
+            # crop and resave texture file
+            ctex = crop_texture(s)
             s.save('/'.join([self.cfg.outputDir, self.cfg.animal, f])+'.obj')
-            # copy texture file
-            shutil.copyfile(s.textureFilename, '/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
+            # TODO simplify mesh
+            s = simplify(s)
+            # regenerate faces
+            s = regen_faces(s)
+            s.save('/'.join([self.cfg.outputDir, self.cfg.animal, f])+'_remesh.obj')
+            
+            ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
+            ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
 
 if __name__ == '__main__':
     import cfg

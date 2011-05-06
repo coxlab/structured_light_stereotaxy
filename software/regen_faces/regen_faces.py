@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, time
 
 from pylab import *
 from scikits import delaunay
@@ -36,10 +36,18 @@ uvs = o.texCoords
 
 tri = delaunay.Triangulation(uvs[:,0], uvs[:,1])
 
-o.faces = []
-for n in tri.triangle_nodes:
-    face = list(array(n))
-    o.faces.append((face,[0,0,0],face))
-o.faces = array(o.faces)
+# st = time.time()
+o.faces = zeros((len(tri.triangle_nodes),3,3))
+o.faces[:,0,:] = tri.triangle_nodes
+o.faces[:,1,:] = tri.triangle_nodes
+# print "N:", time.time() - st
+
+# st = time.time()
+# o.faces = []
+# for n in tri.triangle_nodes:
+#     face = list(array(n))
+#     o.faces.append((face,[0,0,0],face))
+# o.faces = array(o.faces)
+# print "O:", time.time() - st
 
 o.save('new.obj')
