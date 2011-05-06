@@ -16,45 +16,90 @@ class OBJ:
         self.faces = numpy.transpose(numpy.array([[[],[],[]],[[],[],[]],[[],[],[]]]))
         self.textureFilename = None
     def load(self, filename, textureFilename = None):
-        self.vertices = []
-        self.normals = []
-        self.texCoords = []
-        self.faces = []
         self.textureFilename = textureFilename
+        self.vertices = numpy.fromregex(filename,
+                    r"v\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
+                    (numpy.float64, 3))
+        self.normals = numpy.fromregex(filename,
+                    r"vn\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
+                    (numpy.float64, 3))
+        self.texCoords = numpy.fromregex(filename,
+                    r"vt\s+([\d,.,-]+)\s+([\d,.,-]+)",
+                    (numpy.float64, 2))
+        if len(self.texCoords) == 0:
+            if len(self.normals) == 0:
+                tf = numpy.fromregex(filename,
+                    r"f\s+([\d]+)\s+([\d]+)\s+([\d]+)",
+                    (numpy.int64, 3))
+                self.faces = numpy.zeros((len(tf),3,3))
+                self.faces[:,0,:] = tf - 1 # vertices
+            else:
+                tf = numpy.fromregex(filename,
+                    r"f\s+([\d]+)/[.*?]/([\d]+)\s+([\d]+)/[.*?]/([\d]+)\s+([\d]+)/[.*?]/([\d]+)",
+                    (numpy.int64, 6))
+                self.faces = numpy.zeros((len(tf),3,3))
+                self.faces[:,0,:] = tf[:,::2] - 1 # vertices
+                self.faces[:,2,:] = tf[:,1::2] - 1 # normals
+        else:
+            if len(self.normals) == 0:
+                tf = numpy.fromregex(filename,
+                    r"f\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)",
+                    (numpy.int64, 6))
+                self.faces = numpy.zeros((len(tf),3,3))
+                self.faces[:,0,:] = tf[:,::2] - 1 # vertices
+                self.faces[:,1,:] = tf[:,1::2] - 1 # texCoords
+            else:
+                tf = numpy.fromregex(filename,
+                    r"f\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)",
+                    (numpy.int64, 9))
+                self.faces = numpy.zeros((len(tf),3,3))
+                self.faces[:,0,:] = tf[:,::3] - 1 # vertices
+                self.faces[:,1,:] = tf[:,1::3] - 1 # texCoords
+                self.faces[:,2,:] = tf[:,2::3] - 1 # normals
+        # self.faces = numpy.fromregex(filename,
+        #             r"f\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)",
+        #             [('v1', numpy.int64), ('t1', numpy.int64),
+        #                             ('v2', numpy.int64), ('t2', numpy.int64),
+        #                             ('v3', numpy.int64), ('t3', numpy.int64)])
+        # zf = numpy.zeros((len(self.faces),3,3))
+        # zf[:,0,:] = numpy.transpose(numpy.vstack((self.faces['v1'],self.faces['v2'],self.faces['v3']))) - 1
+        # zf[:,1,:] = numpy.transpose(numpy.vstack((self.faces['t1'],self.faces['t2'],self.faces['t3']))) - 1
         
-        for line in open(filename, 'r'):
-            if line.startswith('#'): continue
-            values = line.split()
-            if not values: continue
-            if values[0] == 'v': # vertex found
-                # TODO clock this
-                self.vertices.append(map(float, values[1:4]))
-            elif values[0] == 'vn': # normal found
-                self.normals.append(map(float, values[1:4]))
-            elif values[0] == 'vt': # texture coordinate found
-                self.texCoords.append(map(float, values[1:3]))
-            elif values[0] == 'f':
-                face = []
-                texcoords = []
-                norms = []
-                for v in values[1:]:
-                    w = v.split('/')
-                    face.append(int(w[0])-1)
-                    if len(w) >= 2 and len(w[1]) > 0:
-                        texcoords.append(int(w[1])-1)
-                    else:
-                        texcoords.append(0)
-                    if len(w) >=3 and len(w[2]) > 0:
-                        norms.append(int(w[2]))
-                    else:
-                        norms.append(0)
-                if len(face) == 3:
-                    self.faces.append((face, norms, texcoords))
+        # rearrange faces to be [[[v1,v2,v3],[n1,n2,n3],[t1,t2,t3]],...]
         
-        self.vertices = numpy.array(self.vertices) # 3d positions (x,y,z)
-        self.normals = numpy.array(self.normals) # 3d normals (_,_,_)
-        self.texCoords = numpy.array(self.texCoords) # 2d coordinate (u,v)
-        self.faces = numpy.array(self.faces) # list of indices:
+        # for line in open(filename, 'r'):
+        #     if line.startswith('#'): continue
+        #     values = line.split()
+        #     if not values: continue
+        #     if values[0] == 'v': # vertex found
+        #         # TODO clock this
+        #         self.vertices.append(map(float, values[1:4]))
+        #     elif values[0] == 'vn': # normal found
+        #         self.normals.append(map(float, values[1:4]))
+        #     elif values[0] == 'vt': # texture coordinate found
+        #         self.texCoords.append(map(float, values[1:3]))
+        #     elif values[0] == 'f':
+        #         face = []
+        #         texcoords = []
+        #         norms = []
+        #         for v in values[1:]:
+        #             w = v.split('/')
+        #             face.append(int(w[0])-1)
+        #             if len(w) >= 2 and len(w[1]) > 0:
+        #                 texcoords.append(int(w[1])-1)
+        #             else:
+        #                 texcoords.append(0)
+        #             if len(w) >=3 and len(w[2]) > 0:
+        #                 norms.append(int(w[2]))
+        #             else:
+        #                 norms.append(0)
+        #         if len(face) == 3:
+        #             self.faces.append((face, norms, texcoords))
+        
+        # self.vertices = numpy.array(self.vertices) # 3d positions (x,y,z)
+        # self.normals = numpy.array(self.normals) # 3d normals (_,_,_)
+        # self.texCoords = numpy.array(self.texCoords) # 2d coordinate (u,v)
+        # self.faces = numpy.array(self.faces) # list of indices:
         if len(self.vertices) == 0:
             self.vertices = numpy.transpose(numpy.array([[],[],[]]))
         if len(self.normals) == 0:
