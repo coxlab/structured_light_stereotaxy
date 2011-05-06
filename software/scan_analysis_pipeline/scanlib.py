@@ -6,6 +6,8 @@ Define a Scan object that supports:
 
 import logging, os, shutil, subprocess
 
+logging.basicConfig(level=logging.DEBUG)
+
 import numpy, pylab
 import PIL.Image as Image
 from scikits import delaunay
@@ -55,16 +57,24 @@ def regen_faces(o):
     """
     tri = delaunay.Triangulation(o.texCoords[:,0], o.texCoords[:,1])
 
-    o.faces = zeros((len(tri.triangle_nodes),3,3))
+    o.faces = numpy.zeros((len(tri.triangle_nodes),3,3))
     o.faces[:,0,:] = tri.triangle_nodes
     o.faces[:,1,:] = tri.triangle_nodes
     return o
 
-def simply(o):
+def simplify(o, cfg):
     """
     simply a mesh
     """
-    return o
+    try:
+        outputFilename = os.path.splitext(o.objFilename)[0] + "_simple.obj"
+        cmd = "%s -i %s -o %s -s %s" % (cfg.meshlabBin, o.objFilename, outputFilename, cfg.meshlabScript)
+        logging.debug("Running: %s" % cmd)
+        subprocess.Popen(cmd).wait()
+        return o.load(outputFilename, o.textureFilename)
+    except:
+        logging.error("Simplifcation failed, skipping...")
+        return o
 
 class Scan(object):
     """
@@ -180,6 +190,9 @@ class Scan(object):
         bregmaUV = xy_to_uv(bregmaXY, skullTexture)
         lambdaUV = xy_to_uv(lambdaXY, skullTexture)
         
+        logging.debug("B_UV: %f %f" % (bregmaUV[0], bregmaUV[1]))
+        logging.debug("L_UV: %f %f" % (lambdaUV[0], lambdaUV[1]))
+        
         self.bregmaXYZ = self.skullObj.get_positions(*bregmaUV)[0]
         self.lambdaXYZ = self.skullObj.get_positions(*lambdaUV)[0]
         
@@ -248,15 +261,21 @@ class Scan(object):
                         [self.finalObj, 'finalInSkull']]:
             # crop and resave texture file
             ctex = crop_texture(s)
+            ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
             s.save('/'.join([self.cfg.outputDir, self.cfg.animal, f])+'.obj')
+            # update file paths
+            s.textureFilename = '/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png'
+            s.objFilename = '/'.join([self.cfg.outputDir, self.cfg.animal, f])+'.obj'
             # TODO simplify mesh
-            s = simplify(s)
+            s = simplify(s, self.cfg)
             # regenerate faces
             s = regen_faces(s)
             s.save('/'.join([self.cfg.outputDir, self.cfg.animal, f])+'_remesh.obj')
             
-            ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
-            ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
+            # ctex.save('/'.join([self.cfg.outputDir, self.cfg.animal, f]) + '.png')
+        
+        # copy default animalCfg.py to outputDir
+        shutil.copyfile(self.cfg.defaultAnimalCfg,'/'.join([self.cfg.outputDir, self.cfg.animal, "animalCfg.py"]))
 
 if __name__ == '__main__':
     import cfg

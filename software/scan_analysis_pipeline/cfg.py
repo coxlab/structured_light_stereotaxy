@@ -12,7 +12,8 @@ refName = "skull" #"ref" # HACK until refs are here
 skullName = "skull"
 
 scanDir = '/Users/graham/Repositories/coxlab/structured_light_stereotaxy/scans/SurgeryScans'
-outputDir = '/Users/graham/Desktop/3d_pipeline_fixing/analysis/data'
+outputDir = '/Users/graham/Repositories/coxlab/structured_light_stereotaxy/software/scan_analysis_pipeline/data'
+# outputDir = '/Users/graham/Desktop/3d_pipeline_fixing/analysis/data'
 
 skullRefsXYName = 'skullRefsXY'
 #skullRefsXYZName = 'skullRefsXYZ'
@@ -29,6 +30,10 @@ tcRefPts = numpy.array([[4.,15.23,4.5,1.],[0.,22.16,4.5,1.],[-4.,15.23,4.5,1.]])
 freshAnalysis = False # if true, pipeline will run in full and not use existing results
 
 zoomViewBin = '/Users/graham/Projects/glZoomView/zoomView.py'
+meshlabBin = '/Applications/meshlab.app/Contents/MacOS/meshlabserver'
+meshlabScript = '/Users/graham/Repositories/coxlab/structured_light_stereotaxy/software/scan_analysis_pipeline/simplify.mlx'
+
+defaultAnimalCfg = '/Users/graham/Repositories/coxlab/structured_light_stereotaxy/software/scan_analysis_pipeline/animalCfg.py'
 
 attrFuncMap = { 'skullObj'             : 'load_skull_obj',
                 'hatObj'               : 'load_hat_obj',

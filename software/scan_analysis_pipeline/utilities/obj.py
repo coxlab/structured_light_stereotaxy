@@ -15,7 +15,9 @@ class OBJ:
         self.texCoords = numpy.transpose(numpy.array([[],[]]))
         self.faces = numpy.transpose(numpy.array([[[],[],[]],[[],[],[]],[[],[],[]]]))
         self.textureFilename = None
+        self.objFilename = None
     def load(self, filename, textureFilename = None):
+        self.objFilename = filename
         self.textureFilename = textureFilename
         self.vertices = numpy.fromregex(filename,
                     r"v\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
@@ -39,7 +41,7 @@ class OBJ:
                     (numpy.int64, 6))
                 self.faces = numpy.zeros((len(tf),3,3))
                 self.faces[:,0,:] = tf[:,::2] - 1 # vertices
-                self.faces[:,2,:] = tf[:,1::2] - 1 # normals
+                self.faces[:,1,:] = tf[:,1::2] - 1 # normals
         else:
             if len(self.normals) == 0:
                 tf = numpy.fromregex(filename,
@@ -47,15 +49,15 @@ class OBJ:
                     (numpy.int64, 6))
                 self.faces = numpy.zeros((len(tf),3,3))
                 self.faces[:,0,:] = tf[:,::2] - 1 # vertices
-                self.faces[:,1,:] = tf[:,1::2] - 1 # texCoords
+                self.faces[:,2,:] = tf[:,1::2] - 1 # texCoords
             else:
                 tf = numpy.fromregex(filename,
                     r"f\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)",
                     (numpy.int64, 9))
                 self.faces = numpy.zeros((len(tf),3,3))
                 self.faces[:,0,:] = tf[:,::3] - 1 # vertices
-                self.faces[:,1,:] = tf[:,1::3] - 1 # texCoords
-                self.faces[:,2,:] = tf[:,2::3] - 1 # normals
+                self.faces[:,1,:] = tf[:,2::3] - 1 # normals
+                self.faces[:,2,:] = tf[:,1::3] - 1 # texCoords
         # self.faces = numpy.fromregex(filename,
         #             r"f\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)",
         #             [('v1', numpy.int64), ('t1', numpy.int64),
