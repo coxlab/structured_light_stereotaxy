@@ -140,6 +140,14 @@ def load_and_fix_scan(scanDir):
     # skullObj.apply_matrix(sM) #TODO
     skullObj = obj.OBJ()
     skullObj.load('%s/%s' % (scanDir, cfg.skullObjLocation))
+    skullTextureFile = '/'.join((scanDir, cfg.skullTextureLocation))
+    if not os.path.exists(skullTextureFile):
+        # the default skull texture file does not exist, check if a jpg version does
+        jpgFile = os.path.splitext(skullTextureFile)[0] + '.jpg'
+        if os.path.exists(jpgFile):
+            shutil.move(jpgFile,skullTextureFile)
+        else:
+            raise IOError("Could not locate scan texture: %s" % skullTextureFile)
     skullTexture = pylab.imread('%s/%s' % (scanDir, cfg.skullTextureLocation))
     return skullObj, skullTexture
 

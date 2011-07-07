@@ -55,10 +55,15 @@ attrFuncMap = { 'skullObj'             : 'load_skull_obj',
 
 # -- Locations of other scripts --
 
-animal = 'K4'
-skullScan = 'Scan03'
-hatScan = 'Scan04'
-finalScan = 'Scan06'
+animal = 'K2'
+skullScan = 'Scan01'
+hatScan = 'Scan03'
+finalScan = 'Scan05'
+
+# animal = 'K4'
+# skullScan = 'Scan03'
+# hatScan = 'Scan04'
+# finalScan = 'Scan06'
 
 # -- for old pipeline --
 scanRepo = scanDir
