@@ -1,24 +1,36 @@
 #!/usr/bin/env python
 
-import time
+import time, os, shutil
 
 import numpy
 import pylab
 
+from scikits import delaunay
+import PIL.Image as Image
+
 import vector
 
-
 class OBJ:
-    def __init__(self):
+    def __init__(self, fn=None, tx=None):
         self.vertices = numpy.transpose(numpy.array([[],[],[]]))
         self.normals = numpy.transpose(numpy.array([[],[],[]]))
         self.texCoords = numpy.transpose(numpy.array([[],[]]))
         self.faces = numpy.transpose(numpy.array([[[],[],[]],[[],[],[]],[[],[],[]]]))
         self.textureFilename = None
         self.objFilename = None
+        if not (fn is None):
+            self.load(fn, tx)
     def load(self, filename, textureFilename = None):
         self.objFilename = filename
         self.textureFilename = textureFilename
+        if self.textureFilename is None:
+            # guess textureFilename
+            bn = os.path.splitext(filename)[0]
+            if os.path.exists(bn + '.png'):
+                self.textureFilename = bn + '.png'
+            #elif os.path.exists(bn + '.jpg'): # don't automatically load jpgs
+            #    self.textureFilename = bn + '.jpg'
+
         self.vertices = numpy.fromregex(filename,
                     r"v\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
                     (numpy.float64, 3))
@@ -114,7 +126,35 @@ class OBJ:
         #   face[1] = (n1, n2, n3)
         #   face[2] = (t1, t2, t3)
     
+    def crop_texture(self):
+        im = Image.open(self.textureFilename)
+        w, h = im.size
+        uvs = self.texCoords
+        xys = numpy.zeros_like(uvs)
+        xys[:,0] = uvs[:,0]*w
+        xys[:,1] = h - uvs[:,1]*h
+
+        xm, ym = (xys.min(0) - 2).astype(int)
+        xM, yM = (xys.max(0) + 2).astype(int)
+
+        cim = im.crop((xm,ym,xM,yM))
+        cw, ch = cim.size
+        cw = float(cw)
+        ch = float(ch)
+
+        self.texCoords[:,0] = (xys[:,0] - xm) / cw
+        self.texCoords[:,1] = 1. - (xys[:,1] - ym) / ch
+
+        return cim
+
+    def regen_faces(self):
+        tri = delaunay.Triangulation(self.texCoords[:,0], self.texCoords[:,1])
+        self.faces = numpy.zeros((len(tri.triangle_nodes),3,3))
+        self.faces[:,0,:] = tri.triangle_nodes
+        self.faces[:,1,:] = tri.triangle_nodes
+        self.faces[:,2,:] = tri.triangle_nodes
     
+
     def center_mean(self):
         self.vertices = self.vertices - numpy.mean(self.vertices, 0)
     
@@ -158,7 +198,12 @@ class OBJ:
                     # f p1 ...
                     o.write("f %i %i %i\n" % (f[0][0]+1, f[0][1]+1, f[0][2]+1))
         o.close()
-    
+
+        # copy over texture filename
+        if not (self.textureFilename is None):
+            base, _ = os.path.splitext(outputFile)
+            _, ext = os.path.splitext(self.textureFilename)
+            shutil.copyfile(self.textureFilename, base + ext)
     
     def save_as_pov(self, outputFile):
         o = open(outputFile, 'w')

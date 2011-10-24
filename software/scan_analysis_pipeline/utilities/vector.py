@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import logging
+
 from numpy import *
 from pylab import norm
 from scipy import optimize
@@ -188,15 +190,27 @@ def recenter(points):
 def angle_between_vectors(v1, v2):
     return arccos(dot(v1, v2))
 
-def calculate_rigid_transform(fromPts, toPts, p0=zeros(6,dtype=float64)):
+def calculate_rigid_transform(fromPts, toPts, p0=zeros(6,dtype=float64), **kwargs):
     """Accepts homogenous points only, only uses the first 3 points"""
-    fit_it = lambda p: ravel((toPts[:3] - (fromPts[:3] * transform_to_matrix(*p)))[:,:3])
-    return transform_to_matrix(*(optimize.leastsq(fit_it, p0)[0]))
+    def residuals(p):
+        r = ravel((toPts - (fromPts * transform_to_matrix(*p)))[:,:3])
+        #print "residuals:", r[:10]
+        print "sse:", sum(r**2)
+        return r
+    #fit_it = lambda p: ravel((toPts - (fromPts * transform_to_matrix(*p)))[:,:3])
+    fit_it = residuals
+    # ftol : relative error desired in sum of square
+    # xtol : relative error desired in the approximate solution
+    bestT, cov_x, infodict, mesg, ier = optimize.leastsq(fit_it, p0, maxfev=14000, full_output=True, **kwargs)
+    logging.debug("ier: %i; mesg: %s" % (ier, mesg))
+    logging.debug("Best transform: %s" % str(bestT))
+    return transform_to_matrix(*bestT), (cov_x, infodict, mesg, ier)
+    #return transform_to_matrix(*(optimize.leastsq(fit_it, p0)[0]))
 
-def fit_rigid_transform(fromPts, toPts, p0=zeros(6,dtype=float64)):
-    """Accepts homogenous points only"""
-    fit_it = lambda p: ravel((toPts[:3] - (fromPts[:3] * transform_to_matrix(*p)))[:,:3])
-    return transform_to_matrix(*(optimize.leastsq(fit_it, p0)[0]))
+#def fit_rigid_transform(fromPts, toPts, p0=zeros(6,dtype=float64)):
+#    """Accepts homogenous points only"""
+#    fit_it = lambda p: ravel((toPts[:3] - (fromPts[:3] * transform_to_matrix(*p)))[:,:3])
+#    return transform_to_matrix(*(optimize.leastsq(fit_it, p0)[0]))
 
 # def vectors_to_axis_rotation(v1, v2, axis):
 #     """Axis = 0,1,2 = corresponding to x,y,z"""
