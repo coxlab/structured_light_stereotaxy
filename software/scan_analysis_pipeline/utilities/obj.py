@@ -34,9 +34,9 @@ class OBJ:
         self.vertices = numpy.fromregex(filename,
                     r"v\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
                     (numpy.float64, 3))
-        self.normals = numpy.fromregex(filename,
-                    r"vn\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
-                    (numpy.float64, 3))
+        #self.normals = numpy.fromregex(filename,
+        #            r"vn\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
+        #            (numpy.float64, 3))
         self.texCoords = numpy.fromregex(filename,
                     r"vt\s+([\d,.,-]+)\s+([\d,.,-]+)",
                     (numpy.float64, 2))

@@ -165,6 +165,7 @@ def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
     npts = numpy.zeros_like(tcRefsUV)
     for v in xrange(5):
         row = tcRefsUV[v*9:(v+1)*9]
+        #print row
         row = row[numpy.argsort(row[:,0])[::-1]]
         npts[v*9:(v+1)*9] = row
     tcRefsUV = npts

@@ -14,7 +14,7 @@ import quaternion
 
 #import objLoader
 import bjg.glObj as glObj
-from bjg.glOrbiter import Orbiter
+#from bjg.glOrbiter import Orbiter
 
 #outputFile = 'selectedPoints.csv'
 outputFile = ''
@@ -135,6 +135,7 @@ def keyboard_main(key, x, y):
         switch_to_tool('Select')
     elif key == 'm': # toggle mesh
         obj.showMesh = not obj.showMesh
+        obj.showTexture = obj.showMesh
         glutSetWindow(viewWinID)
         glutPostRedisplay()
     elif key == 'p': # toggle point cloud
