@@ -5,7 +5,11 @@ import time, os, shutil
 import numpy
 import pylab
 
-from scikits import delaunay
+#from scikits import delaunay
+try:
+    import matplotlib.delaunay as delaunay
+except ImportError:
+    from scikits import delaunay
 import PIL.Image as Image
 
 import vector
