@@ -312,7 +312,7 @@ class PanZoom:
         glEnd()
     
     # ---- texture -----
-    def load_image(self, imageFilename):
+    def load_image(self, imageFilename, scale_window=False):
         glEnable(GL_TEXTURE_2D)
         if self.texture != None:
             glDeleteTextures(self.texture)
@@ -324,12 +324,20 @@ class PanZoom:
         self.imageSize = image.size
         
         glutSize = (glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_WIDTH))
-        if self.imageSize[0] <= glutSize[0] and self.imageSize[1] <= glutSize[1]:
-            self.scale = 1.
-            glutReshapeWindow(*self.imageSize)
+        if scale_window:
+            if self.imageSize[0] <= glutSize[0] and self.imageSize[1] <= glutSize[1]:
+                self.scale = 1.
+                glutReshapeWindow(*self.imageSize)
+            else:
+                self.scale = max(glutSize[0]/float(self.imageSize[0]), glutSize[1]/float(self.imageSize[1]))
+                glutReshapeWindow(int(math.ceil(self.imageSize[0]*self.scale)), int(math.ceil(self.imageSize[1]*self.scale)))
         else:
-            self.scale = max(glutSize[0]/float(self.imageSize[0]), glutSize[1]/float(self.imageSize[1]))
-            glutReshapeWindow(int(math.ceil(self.imageSize[0]*self.scale)), int(math.ceil(self.imageSize[1]*self.scale)))
+            if self.imageSize[0] <= glutSize[0] and self.imageSize[1] <= glutSize[1]:
+                self.scale = min(glutSize[0]/float(self.imageSize[0]), glutSize[1]/float(self.imageSize[1]))
+                glutReshapeWindow(int(math.ceil(self.imageSize[0]*self.scale)), int(math.ceil(self.imageSize[1]*self.scale)))
+            else:
+                self.scale = max(glutSize[0]/float(self.imageSize[0]), glutSize[1]/float(self.imageSize[1]))
+                glutReshapeWindow(int(math.ceil(self.imageSize[0]*self.scale)), int(math.ceil(self.imageSize[1]*self.scale)))
         
         glColor4f(1.,1.,1.,1.)
         glBindTexture(GL_TEXTURE_2D, self.texture)
