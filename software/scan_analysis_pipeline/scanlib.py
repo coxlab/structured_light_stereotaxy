@@ -278,6 +278,7 @@ class Scan(object):
         shutil.copyfile(self.cfg.defaultAnimalCfg,'/'.join([self.cfg.outputDir, self.cfg.animal, "animalCfg.py"]))
 
 if __name__ == '__main__':
+    raise NotImplementedError("This script is out of date")
     import cfg
     
     cfg.process_options() # process commandline

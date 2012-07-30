@@ -46,6 +46,8 @@
         save scan in skull coordinates
 """
 
+raise NotImplementedError("This script is out of date")
+
 import os, shutil, subprocess
 
 import numpy
