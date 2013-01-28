@@ -12,29 +12,66 @@ except ImportError:
     from scikits import delaunay
 import PIL.Image as Image
 
+from read_3d3 import read_3d3
 import vector
+
 
 class OBJ:
     def __init__(self, fn=None, tx=None):
-        self.vertices = numpy.transpose(numpy.array([[],[],[]]))
-        self.normals = numpy.transpose(numpy.array([[],[],[]]))
-        self.texCoords = numpy.transpose(numpy.array([[],[]]))
-        self.faces = numpy.transpose(numpy.array([[[],[],[]],[[],[],[]],[[],[],[]]]))
+        self.vertices = numpy.transpose(numpy.array([[], [], []]))
+        self.normals = numpy.transpose(numpy.array([[], [], []]))
+        self.texCoords = numpy.transpose(numpy.array([[], []]))
+        self.faces = numpy.transpose( \
+                numpy.array([[[], [], []], [[], [], []], [[], [], []]]))
         self.textureFilename = None
         self.objFilename = None
         if not (fn is None):
             self.load(fn, tx)
-    def load(self, filename, textureFilename = None):
-        self.objFilename = filename
-        self.textureFilename = textureFilename
-        if self.textureFilename is None:
-            # guess textureFilename
+
+    def load(self, filename, textureFilename=None):
+        ext = os.path.splitext(filename.lower())[1]
+        self.load_texture(filename, textureFilename)
+        if ext == '.obj':
+            self.load_obj(filename)
+        elif ext == '.3d3':
+            self.load_3d3(filename)
+
+    def load_texture(self, filename, textureFilename=None):
+        if textureFilename is None:
             bn = os.path.splitext(filename)[0]
             if os.path.exists(bn + '.png'):
                 self.textureFilename = bn + '.png'
-            #elif os.path.exists(bn + '.jpg'): # don't automatically load jpgs
-            #    self.textureFilename = bn + '.jpg'
+        else:
+            self.textureFilename = textureFilename
 
+    def load_3d3(self, filename):
+        self.objFilename = filename  # FIXME
+        fd = read_3d3(filename)
+        # self.info
+        self.info = fd['info']
+
+        # self.vertices
+        self.vertices = numpy.array(fd['verts'], dtype='f8')
+
+        # self.texCoords
+        # convert grid to uv
+        grid = numpy.array(fd['grid'], dtype='f8')
+        self.texCoords = numpy.zeros_like(grid)
+        w = fd['info']['grid_width']
+        h = fd['info']['grid_height']
+        self.texCoords[:, 0] = (grid[:, 1] / float(w))
+        self.texCoords[:, 1] = 1. - (grid[:, 0] / float(h))
+
+        # self.normals
+        self.normals = numpy.transpose(numpy.array([[], [], []]))
+
+        # self.faces indices [verts, normals, texcoords]
+        self.faces = numpy.zeros((fd['info']['n_faces'], 3, 3), dtype='i8')
+        self.faces[:, 0, :] = numpy.array(fd['faces'])
+        self.faces[:, 2, :] = self.faces[:, 0, :]
+
+    def load_obj(self, filename):
+        self.objFilename = filename
         self.vertices = numpy.fromregex(filename,
                     r"v\s+([\d,.,-]+)\s+([\d,.,-]+)\s+([\d,.,-]+)",
                     (numpy.float64, 3))
@@ -49,23 +86,23 @@ class OBJ:
                 tf = numpy.fromregex(filename,
                     r"f\s+([\d]+)\s+([\d]+)\s+([\d]+)",
                     (numpy.int64, 3))
-                self.faces = numpy.zeros((len(tf),3,3))
-                self.faces[:,0,:] = tf - 1 # vertices
+                self.faces = numpy.zeros((len(tf), 3, 3))
+                self.faces[:, 0, :] = tf - 1  # vertices
             else:
                 tf = numpy.fromregex(filename,
                     r"f\s+([\d]+)/[.*?]/([\d]+)\s+([\d]+)/[.*?]/([\d]+)\s+([\d]+)/[.*?]/([\d]+)",
                     (numpy.int64, 6))
-                self.faces = numpy.zeros((len(tf),3,3))
-                self.faces[:,0,:] = tf[:,::2] - 1 # vertices
-                self.faces[:,1,:] = tf[:,1::2] - 1 # normals
+                self.faces = numpy.zeros((len(tf), 3, 3))
+                self.faces[:, 0, :] = tf[:, ::2] - 1  # vertices
+                self.faces[:, 1, :] = tf[:, 1::2] - 1  # normals
         else:
             if len(self.normals) == 0:
                 tf = numpy.fromregex(filename,
                     r"f\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)\s+([\d]+)/([\d]+)",
                     (numpy.int64, 6))
-                self.faces = numpy.zeros((len(tf),3,3))
-                self.faces[:,0,:] = tf[:,::2] - 1 # vertices
-                self.faces[:,2,:] = tf[:,1::2] - 1 # texCoords
+                self.faces = numpy.zeros((len(tf), 3, 3))
+                self.faces[:, 0, :] = tf[:, ::2] - 1  # vertices
+                self.faces[:, 2, :] = tf[:, 1::2] - 1  # texCoords
             else:
                 tf = numpy.fromregex(filename,
                     r"f\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)\s+([\d]+)/([\d]+)/([\d]+)",

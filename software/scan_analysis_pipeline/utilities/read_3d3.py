@@ -66,8 +66,11 @@ def read_3d3(fn):
     f = open(fn, 'rb')
     fd = {}
     fd['info'] = read_header(f)
+    # verts are x, y, z, positions
     fd['verts'] = read_verts(f, fd['info']['n_verts'])
+    # grid are y, x pixel coordinates
     fd['grid'] = read_grid(f, fd['info']['n_grid'])
+    # faces are v0, v1, v2 vertex indice
     fd['faces'] = read_faces(f, fd['info']['n_faces'])
     #uvs = read_uvs(f, info['n_uvs'])
     #print len(verts)
