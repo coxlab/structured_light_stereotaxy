@@ -11,7 +11,7 @@ play some tricks:
     use this to guess:
         candidate angles for the shaft
         candidate lengths for the shaft
-   
+
 """
 
 import sys
@@ -20,7 +20,8 @@ import sys
 import numpy
 from pylab import *
 
-#import pymorph
+# import pymorph
+
 
 def gabor(sigma, theta=0., lam=None, psi=0.0, gamma=1.0, ksize=None, removeDC=True):
     """
@@ -34,14 +35,15 @@ def gabor(sigma, theta=0., lam=None, psi=0.0, gamma=1.0, ksize=None, removeDC=Tr
     if ksize == None:
         ksize = sigma * 6
         ksize = int(ksize + 1 - ksize % 2)
-    
+
     if lam == None:
         lam = sigma * 2.
-    
-    y, x = numpy.lib.index_tricks.nd_grid()[:ksize,:ksize] - ksize/2
+
+    y, x = numpy.lib.index_tricks.nd_grid()[:ksize, :ksize] - ksize / 2
     xp = x * cos(theta) + y * sin(theta)
     yp = -x * sin(theta) + y * cos(theta)
-    gb = exp(- (xp**2 + gamma**2 * yp**2) / (2 * sigma**2)) * cos(2. * pi * xp / lam + psi)
+    gb = exp(- (xp ** 2 + gamma ** 2 * yp ** 2) / (2 * sigma ** 2)) * cos(2. *
+                                                                          pi * xp / lam + psi)
     if removeDC:
         return gb - average(gb)
     else:
@@ -49,38 +51,41 @@ def gabor(sigma, theta=0., lam=None, psi=0.0, gamma=1.0, ksize=None, removeDC=Tr
 
 
 def find_tip(im, a0=0., l0=10.):
-    # find approximate distance between cameras and shaft, assume shaft is < 15 mm (Z?) from origin
-    return 1,1
+    # find approximate distance between cameras and shaft, assume shaft is <
+    # 15 mm (Z?) from origin
+    return 1, 1
 
 if __name__ == '__main__':
     # read stage angle from testImageStageAngle
     stageAngles = loadtxt('testImageStageAngles')
-    
+
     # read camera locations from testImageCameraLocations
     lCamLocation, rCamLocation = loadtxt('testImageCameraLocations')
     # 20 x 15.1 degree field of view
-    
+
     imageIndex = 2
     if len(sys.argv) > 1:
         imageIndex = int(sys.argv[1])
-    
+
     leftImage = imread('0/%i.png' % imageIndex)
     rightImage = imread('1/%i.png' % imageIndex)
-    
+
     stageAngle = stageAngles[imageIndex]
-    
+
     # guess a length based on the location of the cameras
-    pixPerDeg = leftImage.shape[1] / 20.0 # image width / 20 degrees horizontal field of view
+    pixPerDeg = leftImage.shape[1] / \
+        20.0  # image width / 20 degrees horizontal field of view
     leftLengthGuess = arctan2(10., norm(lCamLocation)) * 2. * pixPerDeg
     rightLengthGuess = arctan2(10., norm(rCamLocation)) * 2. * pixPerDeg
     print "Shaft length guess (in pixels): %.3f %.3f" % (leftLengthGuess, rightLengthGuess)
-    
+
     leftTipLocation = find_tip(leftImage, a0=stageAngle, l0=leftLengthGuess)
     rightTipLocation = find_tip(rightImage, a0=stageAngle, l0=rightLengthGuess)
-    
+
     # might be faster to do this together (so that I only generate the gabors once)
-    #leftTipLocation, rightTipLocation = find_tip(leftImage, rightImage, stageAngle, lCamLocation, rCamLocation)
-    
+    # leftTipLocation, rightTipLocation = find_tip(leftImage, rightImage,
+    # stageAngle, lCamLocation, rCamLocation)
+
     figure()
     subplot(121)
     imshow(leftImage)

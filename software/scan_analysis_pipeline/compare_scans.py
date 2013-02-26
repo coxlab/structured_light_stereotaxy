@@ -14,15 +14,15 @@ class Scan(object):
     def __init__(self, directory):
         self.directory = directory
         self.scan_to_skull = numpy.loadtxt(
-                os.path.join(directory, 'scanToSkull'))
+            os.path.join(directory, 'scanToSkull'))
         self.skull_to_hat = numpy.loadtxt(
-                os.path.join(directory, 'skullToHat'))
+            os.path.join(directory, 'skullToHat'))
         self.skull = utilities.obj.OBJ(
-                os.path.join(directory, 'skull.obj'))
+            os.path.join(directory, 'skull.obj'))
         self.hat = utilities.obj.OBJ(
-                os.path.join(directory, 'hat.obj'))
+            os.path.join(directory, 'hat.obj'))
         self.final = utilities.obj.OBJ(
-                os.path.join(directory, 'final.obj'))
+            os.path.join(directory, 'final.obj'))
 
 
 def find_furthest_point(scan, lookup=True):
@@ -56,7 +56,7 @@ def get_transform_difference(a, b):
     apos, aangle = utilities.vector.decompose_matrix(a.skull_to_hat)
     bpos, bangle = utilities.vector.decompose_matrix(b.skull_to_hat)
     return numpy.array(apos) - numpy.array(bpos), \
-            numpy.array(aangle) - numpy.array(bangle)
+        numpy.array(aangle) - numpy.array(bangle)
 
 
 def compare(a, b):
