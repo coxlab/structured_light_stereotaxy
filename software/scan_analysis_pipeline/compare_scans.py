@@ -36,6 +36,11 @@ class Scan(object):
         self.hat_refs_in_skull = numpy.loadtxt(
             os.path.join(directory, 'tcRefsInSkull'))
 
+        # project skull pts to hat
+        self.hat_refs_in_hat = utilities.vector.apply_matrix_to_points(
+            numpy.matrix(self.skull_to_hat),
+            self.hat_refs_in_skull)
+
 
 class Plot(object):
     def __init__(self, a, b, attr, label=False):
@@ -74,6 +79,13 @@ class Plot(object):
             if self.label:
                 for (i, p) in enumerate(pts):
                     ax.text(p[0], p[1], str(i))
+            mr = 0.
+            for l in (ax.get_xlim(), ax.get_ylim()):
+                mr = max(mr, l[1] - l[0])
+            for l in ('xlim', 'ylim'):
+                lim = getattr(ax, 'get_%s' % l)()
+                m = (lim[1] + lim[0]) / 2.
+                getattr(ax, 'set_%s' % l)(m - mr / 2., m + mr / 2.)
             ax.set_title(scan.directory)
 
     def show_3d(self):
@@ -83,12 +95,17 @@ class Plot(object):
         b_ax = self.figure.add_subplot(122, projection='3d')
         for (ax, pts, scan) in ((a_ax, self.apts, self.a),
                                 (b_ax, self.bpts, self.b)):
-            print '3d'
             ax.scatter3D(pts[:, 0], pts[:, 1], pts[:, 2])
             if self.label:
                 for (i, p) in enumerate(pts):
                     ax.text3D(p[0], p[1], p[2], str(i))
-
+            mr = 0.
+            for l in (ax.get_xlim3d(), ax.get_ylim3d(), ax.get_zlim3d()):
+                mr = max(mr, l[1] - l[0])
+            for l in ('xlim3d', 'ylim3d', 'zlim3d'):
+                lim = getattr(ax, 'get_%s' % l)()
+                m = (lim[1] + lim[0]) / 2.
+                getattr(ax, 'set_%s' % l)(m - mr / 2., m + mr / 2.)
             ax.set_title(scan.directory)
 
 
@@ -136,8 +153,10 @@ def compare(a, b):
             'Delta Angle(degrees)': dangle,
         }
     for pts in ('final_refs_uv', 'hat_refs_uv',
-                'skull_refs_uv', 'hat_refs_in_skull'):
+                'skull_refs_uv', 'hat_refs_in_skull',
+                'hat_refs_in_hat'):
         r[pts] = Plot(a, b, pts, label=True)
+
     return r
 
 
