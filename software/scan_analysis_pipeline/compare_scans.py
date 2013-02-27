@@ -18,7 +18,6 @@ class Scan(object):
             os.path.join(directory, 'scanToSkull'))
         self.skull_to_hat = numpy.loadtxt(
             os.path.join(directory, 'skullToHat'))
-
         self.skull = utilities.obj.OBJ(
             os.path.join(directory, 'skull.obj'))
         self.hat = utilities.obj.OBJ(

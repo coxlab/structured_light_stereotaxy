@@ -26,19 +26,19 @@ def read_header_v1(f):
     info = {}
     info['grid_height'] = pint(f)
     info['grid_width'] = pint(f)
-    #info['tex_height'] = pint(f)
-    #info['tex_width'] = pint(f)
+    # info['tex_height'] = pint(f)
+    # info['tex_width'] = pint(f)
     info['tex_step_h'] = pint(f)
     info['tex_step_w'] = pint(f)
     info['cam_dist'] = pdouble(f)
     info['n_verts'] = pint(f)
-    #info['n_faces'] = pint(f)
+    # info['n_faces'] = pint(f)
     info['n_grid'] = pint(f)
     info['n_faces'] = pint(f)
-    #info['n_uvs'] = pint(f)
+    # info['n_uvs'] = pint(f)
     if info['n_grid'] != info['n_verts']:
-        raise ValueError('n_grid[%s] != n_verts[%s]' % \
-                (info['n_grid'], info['n_verts']))
+        raise ValueError('n_grid[%s] != n_verts[%s]' %
+                        (info['n_grid'], info['n_verts']))
     return info
 
 
@@ -72,14 +72,14 @@ def read_3d3(fn):
     fd['grid'] = read_grid(f, fd['info']['n_grid'])
     # faces are v0, v1, v2 vertex indice
     fd['faces'] = read_faces(f, fd['info']['n_faces'])
-    #uvs = read_uvs(f, info['n_uvs'])
-    #print len(verts)
+    # uvs = read_uvs(f, info['n_uvs'])
+    # print len(verts)
     p = f.tell()
     f.seek(0, 2)
     e = f.tell()
     if p != e:
-        raise IOError("Failed to read entire file: final position=%s, end=%s" \
-                % (p, e))
+        raise IOError("Failed to read entire file: final position=%s, end=%s"
+                      % (p, e))
     return fd
 
 

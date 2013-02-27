@@ -22,10 +22,10 @@ imshow(im, interpolation='nearest')
 
 # show uv coordinates
 uvs = o.texCoords
-xys = transpose(vstack((uvs[:,0]*w,h - uvs[:,1]*h)))
-scatter(xys[:,0],xys[:,1],c='k')
-mx = min(xys[:,1])
-rxy = xys[where(xys==mx)[0],:]
-scatter(rxy[:,0],rxy[:,1],c='b')
+xys = transpose(vstack((uvs[:, 0] * w, h - uvs[:, 1] * h)))
+scatter(xys[:, 0], xys[:, 1], c='k')
+mx = min(xys[:, 1])
+rxy = xys[where(xys == mx)[0], :]
+scatter(rxy[:, 0], rxy[:, 1], c='b')
 
 show()

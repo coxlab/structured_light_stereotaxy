@@ -6,7 +6,7 @@ Define a Scan object that supports:
 
 import logging
 import os
-#import shutil
+# import shutil
 import subprocess
 import sys
 import tempfile
@@ -89,8 +89,8 @@ def simplify(o):
     return o
     try:
         # save to temp dir
-        #outputFilename = os.path.splitext(o.objFilename)[0] + "_simple.obj"
-        #cmd = "%s -i %s -o %s -s %s" % ("meshlabserver", \
+        # outputFilename = os.path.splitext(o.objFilename)[0] + "_simple.obj"
+        # cmd = "%s -i %s -o %s -s %s" % ("meshlabserver", \
         #        o.objFilename, outputFilename, "simplify.mlx")
         tempDir = tempfile.mkdtemp()
         infile = "%s/temp.obj" % tempDir
@@ -101,7 +101,7 @@ def simplify(o):
         subprocess.Popen(cmd).wait()
         logging.debug("Command finished")
         return obj.OBJ(outfile, o.textureFilename)
-        #return o.load(outputFilename, o.textureFilename)
+        # return o.load(outputFilename, o.textureFilename)
     except Exception as E:
         logging.error("Simplifcation failed, skipping [%s]" % str(E))
     return o
@@ -129,8 +129,8 @@ def find_refs(obj, dataFilename):
         global zoomviewbin
         so = file(dataFilename, 'w')
         obj.textureFilename
-        subprocess.Popen("python %s %s" % (zoomviewbin, \
-                obj.textureFilename), shell=True, stdout=so).wait()
+        subprocess.Popen("python %s %s" % (zoomviewbin,
+                                           obj.textureFilename), shell=True, stdout=so).wait()
         so.close()
     return load_ref_points(dataFilename)
 
@@ -150,24 +150,24 @@ def calculate_scan_to_skull_matrix(skullObj, skullRefsUV):
     lambdaXYZ = skullObj.get_positions(*lambdaUV)[0]
 
     global bregmaNormalMaxDistance
-    bregmaNormal = skullObj.get_average_normal(bregmaXYZ, \
-            bregmaNormalMaxDistance)
+    bregmaNormal = skullObj.get_average_normal(bregmaXYZ,
+                                               bregmaNormalMaxDistance)
 
     bregmaToLambdaVector = pylab.array(lambdaXYZ) - pylab.array(bregmaXYZ)
     # order skullrefs
     a1 = numpy.cross(-numpy.array(bregmaToLambdaVector), bregmaNormal)
     a1 /= pylab.norm(a1)
-    #a2 = numpy.cross(bNorm, a1)
+    # a2 = numpy.cross(bNorm, a1)
     a2 = -numpy.array(bregmaToLambdaVector)
     a2 /= pylab.norm(a2)
-    #a3 = bNorm
+    # a3 = bNorm
     a3 = numpy.cross(a1, -numpy.array(bregmaToLambdaVector))
     a3 /= pylab.norm(a3)
-    #R = vector.rebase(numpy.cross(-numpy.array(bToLVec), \
+    # R = vector.rebase(numpy.cross(-numpy.array(bToLVec), \
     #        bNorm), -numpy.array(bToLVec), bNorm)
     R = vector.rebase(a1, a2, a3)
-    T = vector.translation_to_matrix(-bregmaXYZ[0], -bregmaXYZ[1], \
-            -bregmaXYZ[2])
+    T = vector.translation_to_matrix(-bregmaXYZ[0], -bregmaXYZ[1],
+                                     -bregmaXYZ[2])
     scanToSkull = vector.translate_and_rotate(T, R)
     skullRefsXYZ = numpy.ones((2, 4), dtype=numpy.float64)
     skullRefsXYZ[0, :3] = bregmaXYZ
@@ -185,7 +185,7 @@ def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
     npts = numpy.zeros_like(tcRefsUV)
     for v in xrange(5):
         row = tcRefsUV[v * 9:(v + 1) * 9]
-        #print row
+        # print row
         row = row[numpy.argsort(row[:, 0])[::-1]]
         npts[v * 9:(v + 1) * 9] = row
     tcRefsUV = npts
@@ -200,7 +200,7 @@ def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
             goodPts.append(i)
         else:
             logging.debug("failed to find hat ref at uv: %s" % str(uv))
-        #tcRefsXYZ.append(hatObj.get_positions(*uv)[0])
+        # tcRefsXYZ.append(hatObj.get_positions(*uv)[0])
     tcRefsXYZ = numpy.array(tcRefsXYZ)
     logging.debug("Good hat ref indices: %s" % str(goodPts))
     goodPts = numpy.array(goodPts)
@@ -208,31 +208,31 @@ def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
     tcRefs_in_skull = vector.apply_matrix_to_points(scanToSkull, tcRefsXYZ)
     global tcRefPts
     tcRefPts = numpy.array(tcRefPts)[goodPts]
-    skullToHat, fitR = vector.calculate_rigid_transform(tcRefs_in_skull, \
-            tcRefPts)
-    #skullToHat, fitR = vector.calculate_rigid_transform(tcRefs_in_skull, \
+    skullToHat, fitR = vector.calculate_rigid_transform(tcRefs_in_skull,
+                                                        tcRefPts)
+    # skullToHat, fitR = vector.calculate_rigid_transform(tcRefs_in_skull, \
     #        tcRefPts)
     return skullToHat, tcRefsXYZ, tcRefs_in_skull, fitR
 
 
 def calculate_scan_to_hat_matrix(self):
     raise NotImplemented
-    self.scanToHat = vector.calculate_rigid_transform(self.tcRefsXYZ, \
-            self.cfg.tcRefPts)
+    self.scanToHat = vector.calculate_rigid_transform(self.tcRefsXYZ,
+                                                      self.cfg.tcRefPts)
 
 
 def convert_scans_to_skull_coordinates(self):
     raise NotImplemented
     for s in [self.skullObj, self.hatObj, self.finalObj]:
         if s.frame != 'skull':
-            s.vertices = vector.apply_matrix_to_points(\
-                    pylab.matrix(self.scanToSkull), s.vertices)[:, :3]
+            s.vertices = vector.apply_matrix_to_points(
+                pylab.matrix(self.scanToSkull), s.vertices)[:, :3]
             s.frame = 'skull'
 
 
 def convert_mesh_to_skull(s, scanToSkull):
-    s.vertices = vector.apply_matrix_to_points(\
-            pylab.matrix(scanToSkull), s.vertices)[:, :3]
+    s.vertices = vector.apply_matrix_to_points(
+        pylab.matrix(scanToSkull), s.vertices)[:, :3]
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -253,9 +253,9 @@ if __name__ == '__main__':
         os.makedirs(outDir)
     # load refs and get scaling factors?
     # TODO
-    #skullRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, skullI))
-    #hatRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, hatI))
-    #finalRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, finalI))
+    # skullRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, skullI))
+    # hatRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, hatI))
+    # finalRef = obj.OBJ("%s/Scan%02i/ref.obj" % (scanDir, finalI))
 
     # load OBJs, Remesh, and get ref points
     logging.debug("Opening skull scan")
@@ -270,12 +270,12 @@ if __name__ == '__main__':
         skullRefs = load_ref_points(refFile)
 
     logging.debug("calculating scan to skull")
-    scanToSkull, skullRefsXYZ, bases = calculate_scan_to_skull_matrix(\
-            skullObjSimple, skullRefs)
+    scanToSkull, skullRefsXYZ, bases = calculate_scan_to_skull_matrix(
+        skullObjSimple, skullRefs)
     pylab.savetxt("%s/scanToSkull" % outDir, scanToSkull)
     pylab.savetxt("%s/skullRefs" % outDir, skullRefsXYZ)
-    skullRefs_inskull = vector.apply_matrix_to_points(\
-            pylab.matrix(scanToSkull), skullRefsXYZ)
+    skullRefs_inskull = vector.apply_matrix_to_points(
+        pylab.matrix(scanToSkull), skullRefsXYZ)
     pylab.savetxt("%s/skullRefsInSkull" % outDir, skullRefs_inskull)
     # each column is a vector
     pylab.savetxt("%s/bases" % outDir, pylab.vstack(bases).T)
@@ -297,7 +297,7 @@ if __name__ == '__main__':
 
     logging.debug("calculating hat to skull")
     skullToHat, hatRefsXYZ, hatRefs_inskull, fitR = \
-            calculate_skull_to_hat_matrix(hatObjSimple, hatRefs, scanToSkull)
+        calculate_skull_to_hat_matrix(hatObjSimple, hatRefs, scanToSkull)
     pylab.savetxt("%s/skullToHat" % outDir, skullToHat)
     global tcRefPts
     pylab.savetxt("%s/tcRefPts" % outDir, tcRefPts)
@@ -324,10 +324,10 @@ if __name__ == '__main__':
     finalObjSimple.save("%s/finalInSkull.obj" % outDir)
 
     # save fitting results
-    #print fitR
-    #cov_x, infodict, mesg, ier = fitR
-    #print "ier:", ier
-    #print "mesg:", mesg
-    #print "infodict::"
-    #print infodict
-    #pylab.savetxt("cov_x", cov_x)
+    # print fitR
+    # cov_x, infodict, mesg, ier = fitR
+    # print "ier:", ier
+    # print "mesg:", mesg
+    # print "infodict::"
+    # print infodict
+    # pylab.savetxt("cov_x", cov_x)
