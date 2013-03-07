@@ -116,10 +116,22 @@ def load_ref_points(dataFilename):
     l = f.readline()
     imsize = [float(v) for v in l.split('(')[-1].split(')')[-2].split(',')]
 
+    # sort
+    # first by y
+    #assert points.size == 90, "Invalid # of points: %s:%s" % \
+    #    (dataFilename, points.size)
+    if points.size == 90:
+        points = numpy.array(sorted(points, key=lambda x: -x[1]))
+        for i in xrange(5):
+            pts = points[i * 9:(i + 1) * 9]
+            points[i * 9:(i + 1) * 9] = \
+                numpy.array(sorted(pts, key=lambda x: -x[0]))
+
     # convert to uv
     points[:, 0] /= imsize[0]
     points[:, 1] = 1. - points[:, 1] / imsize[1]
 
+    print dataFilename, points.size, points
     return points
 
 
@@ -130,7 +142,8 @@ def find_refs(obj, dataFilename):
         so = file(dataFilename, 'w')
         obj.textureFilename
         subprocess.Popen("python %s %s" % (zoomviewbin,
-                                           obj.textureFilename), shell=True, stdout=so).wait()
+                                           obj.textureFilename),
+                         shell=True, stdout=so).wait()
         so.close()
     return load_ref_points(dataFilename)
 
@@ -175,6 +188,29 @@ def calculate_scan_to_skull_matrix(skullObj, skullRefsUV):
     return scanToSkull, skullRefsXYZ, (a1, a2, a3)
 
 
+def uv_to_xyz(uv, meshObj):
+    # order pts
+    # V+ is up
+    # U+ is right
+    # order right to left and bottom to top
+    # first sort by Y
+    uv = uv[numpy.argsort(uv[:, 1])]
+    nuv = numpy.zeros_like(uv)
+    for v in xrange(5):
+        row = uv[v * 9:(v + 1) * 9]
+        row = row[numpy.argsort(row[:, 0])[::-1]]
+        nuv[v * 9:(v + 1) * 9] = row
+    uv = nuv
+
+    # convert UV to XYZ
+    xyz = {}
+    for (i, uv) in enumerate(uv):
+        p = meshObj.get_positions(*uv)
+        if len(p):
+            xyz[i] = p[0]
+    return xyz
+
+
 def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
     # order tcRefs
     # V+ is up
@@ -213,6 +249,34 @@ def calculate_skull_to_hat_matrix(hatObj, tcRefsUV, scanToSkull):
     # skullToHat, fitR = vector.calculate_rigid_transform(tcRefs_in_skull, \
     #        tcRefPts)
     return skullToHat, tcRefsXYZ, tcRefs_in_skull, fitR
+
+
+def calculate_final_to_skull(finalObj, finalUV, hatObj, hatUV):
+    fxyz = uv_to_xyz(finalUV, finalObj)
+    hxyz = uv_to_xyz(hatUV, hatObj)
+    # get only shared points
+    for k in fxyz:
+        if k not in hxyz:
+            del fxyz[k]
+    for k in hxyz:
+        if k not in fxyz:
+            del hxyz[k]
+    fxyzl = []
+    hxyzl = []
+    print "Found %i shared ponts: %s" % (len(hxyz), sorted(hxyz.keys()))
+    for k in sorted(hxyz):
+        fxyzl.append(fxyz[k])
+        hxyzl.append(hxyz[k])
+    fxyza = numpy.ones((len(hxyzl), 4), dtype='f8')
+    hxyza = numpy.ones((len(fxyzl), 4), dtype='f8')
+    fxyza[:, :3] = numpy.array(fxyzl)
+    hxyza[:, :3] = numpy.array(hxyzl)
+    pylab.savetxt("%s/fxyza" % outDir, fxyza)
+    pylab.savetxt("%s/hxyza" % outDir, hxyza)
+
+    finalToSkull, fitR = vector.calculate_rigid_transform(fxyza, hxyza)
+
+    return finalToSkull, fitR
 
 
 def calculate_scan_to_hat_matrix(self):
@@ -318,8 +382,15 @@ if __name__ == '__main__':
         finalRefs = find_refs(finalObjSimple, refFile)
     else:
         finalRefs = load_ref_points(refFile)
+    logging.debug("fitting final to hat")
+    finalToSkull, fitR = \
+        calculate_final_to_skull(
+            finalObjSimple, finalRefs, hatObjSimple, hatRefs)
+    pylab.savetxt("%s/finalToHat" % outDir, finalToSkull)
     logging.debug("converting final to skull")
-    convert_mesh_to_skull(finalObjSimple, scanToSkull)
+    convert_mesh_to_skull(finalObjSimple, finalToSkull)
+    #logging.debug("converting final to skull")
+    #convert_mesh_to_skull(finalObjSimple, scanToSkull)
     logging.debug("saving final")
     finalObjSimple.save("%s/finalInSkull.obj" % outDir)
 

@@ -25,6 +25,13 @@ class Scan(object):
         self.final = utilities.obj.OBJ(
             os.path.join(directory, 'final.obj'))
 
+        self.final_im = pylab.imread(
+            os.path.join(directory, 'final.png'))
+        self.hat_im = pylab.imread(
+            os.path.join(directory, 'hat.png'))
+        self.skull_im = pylab.imread(
+            os.path.join(directory, 'skull.png'))
+
         self.final_refs_uv = numpy.loadtxt(
             os.path.join(directory, 'finalrefsUV'))
         self.hat_refs_uv = numpy.loadtxt(
@@ -108,6 +115,33 @@ class Plot(object):
             ax.set_title(scan.directory)
 
 
+class UVPlot(Plot):
+    def __init__(self, a, b, imk, uvk):
+        self.a = a
+        self.b = b
+        self.imk = imk
+        self.uvk = uvk
+        self.ima = getattr(a, imk)
+        self.imb = getattr(b, imk)
+        self.uva = getattr(a, uvk)
+        self.uvb = getattr(b, uvk)
+        self.figure = None
+
+    def show(self):
+        if self.figure is None:
+            self.figure = pylab.figure()
+        else:
+            self.figure.clf()
+        axa = self.figure.add_subplot(121)
+        axb = self.figure.add_subplot(122)
+        for (ax, im, uv, scan) in ((axa, self.ima, self.uva, self.a),
+                                   (axb, self.imb, self.uvb, self.b)):
+            ax.imshow(im)
+            ax.scatter(uv[:, 0], uv[:, 1])
+            ax.set_title(scan.directory)
+        self.figure.suptitle('%s & %s' % (self.imk, self.uvk))
+
+
 def find_furthest_point(scan, lookup=True):
     pindex = -1
     mesh = None
@@ -155,6 +189,11 @@ def compare(a, b):
                 'skull_refs_uv', 'hat_refs_in_skull',
                 'hat_refs_in_hat'):
         r[pts] = Plot(a, b, pts, label=True)
+
+    for (im, uv) in zip(
+            ('final_im', 'hat_im', 'skull_im'),
+            ('final_refs_uv', 'hat_refs_uv', 'skull_refs_uv')):
+        r[im] = UVPlot(a, b, im, uv)
 
     return r
 
