@@ -56,7 +56,7 @@ An example command might look like:
 
     python analyze_scans.py scans/S1 1 2 4
 
-The analysis script includes the following steps that require user interaction:
+The analysis script includes the following steps that require user interaction (see example_images):
 
 * identify skull landmarks in skull scan (using bezier curves)
 * identify tc landmarks in hat scan (using line intersections)
